@@ -65,6 +65,7 @@ Return ONLY the requested JSON structure.
             },
             energy: {
               type: "string",
+              enum: ["calm", "moderate", "energetic"],
               description: "The overall energy level of the scene.",
             },
             background: {
@@ -114,6 +115,18 @@ Return ONLY the requested JSON structure.
     });
 
     const settings = JSON.parse(response.text);
+
+    if (settings.energy === "calm") {
+      settings.speed = Math.min(settings.speed, 1);
+    }
+
+    if (settings.energy === "moderate") {
+      settings.speed = Math.min(settings.speed, 2);
+    }
+
+    if (settings.energy === "energetic") {
+      settings.speed = Math.max(settings.speed, 2);
+    }
 
     settings.speed = Math.min(Math.max(settings.speed, 0.1), 3);
     settings.density = Math.min(Math.max(settings.density, 10), 100);
