@@ -219,8 +219,9 @@ generateBtn.addEventListener("click", function () {
       createParticles();
 
       // Show AI interpretation
-      aiSettings.textContent = `${data.density} particles · ${data.movement} movement · ${data.shape} shape · ${data.color}`;
-
+      document.getElementById("aiMood").textContent = data.mood;
+      document.getElementById("aiAtmosphere").textContent = data.atmosphere;
+      document.getElementById("aiEnergy").textContent = data.energy;
       console.log("Prompt:", prompt);
       console.log("Visual settings applied:", visualSettings);
     })

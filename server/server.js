@@ -55,6 +55,18 @@ Return ONLY the requested JSON structure.
               type: "string",
               description: "Main particle color as a hex code.",
             },
+            mood: {
+              type: "string",
+              description: "The emotional mood of the scene.",
+            },
+            atmosphere: {
+              type: "string",
+              description: "The environmental atmosphere of the scene.",
+            },
+            energy: {
+              type: "string",
+              description: "The overall energy level of the scene.",
+            },
             background: {
               type: "string",
               description: "Background color as a hex code.",
@@ -86,6 +98,9 @@ Return ONLY the requested JSON structure.
           },
           required: [
             "color",
+            "mood",
+            "atmosphere",
+            "energy",
             "background",
             "speed",
             "density",
