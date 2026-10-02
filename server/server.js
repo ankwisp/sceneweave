@@ -128,6 +128,18 @@ Return ONLY the requested JSON structure.
       settings.speed = Math.max(settings.speed, 2);
     }
 
+    if (settings.atmosphere.toLowerCase().includes("rain")) {
+      settings.movement = "rain";
+    }
+
+    if (settings.atmosphere.toLowerCase().includes("forest")) {
+      settings.movement = "float";
+    }
+
+    if (settings.atmosphere.toLowerCase().includes("ocean")) {
+      settings.movement = "wave";
+    }
+
     settings.speed = Math.min(Math.max(settings.speed, 0.1), 3);
     settings.density = Math.min(Math.max(settings.density, 10), 100);
     settings.size = Math.min(Math.max(settings.size, 0.5), 2);
