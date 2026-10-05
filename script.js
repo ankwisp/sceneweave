@@ -5,6 +5,7 @@ const promptInput = document.getElementById("promptInput");
 const aiSettings = document.getElementById("aiSettings");
 
 let particles = [];
+let sceneTransition = 1;
 
 let mood = "normal";
 let particleColor = "#D99A9A";
@@ -37,6 +38,8 @@ function applyVisualSettings(settings) {
   particleSizeMultiplier = settings.size;
   particleCount = settings.density;
   backgroundColor = settings.background;
+
+  sceneTransition = 0;
 }
 
 function createParticles() {
@@ -88,11 +91,17 @@ function drawConnections() {
 }
 
 function animate() {
+  sceneTransition += 0.02;
+
+  if (sceneTransition > 1) {
+    sceneTransition = 1;
+  }
+
   ctx.fillStyle = visualSettings.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   for (let particle of particles) {
-    ctx.globalAlpha = particle.opacity;
+    ctx.globalAlpha = particle.opacity * sceneTransition;
     ctx.fillStyle = particleColor;
 
     ctx.shadowBlur = visualSettings.glow;
@@ -123,34 +132,36 @@ function animate() {
 
     ctx.fill();
 
-    // Basic movement
+    // Base movement
     particle.x += particle.speedX * visualSettings.speed;
     particle.y += particle.speedY * visualSettings.speed;
 
-    // Float movement
+    // Movement modes
     if (visualSettings.movement === "float") {
-      particle.x += Math.sin(Date.now() * 0.001 + particle.y) * 0.15;
-      particle.y += Math.cos(Date.now() * 0.001 + particle.x) * 0.15;
+      particle.x += Math.sin(Date.now() * 0.001 + particle.y * 0.01) * 0.35;
+
+      particle.y += Math.cos(Date.now() * 0.001 + particle.x * 0.01) * 0.2;
     }
 
-    // Fast movement
     if (visualSettings.movement === "fast") {
-      particle.x += Math.sin(Date.now() * 0.006 + particle.y) * 1.2;
-      particle.y += Math.cos(Date.now() * 0.006 + particle.x) * 1.2;
+      particle.x += Math.sin(Date.now() * 0.006 + particle.y * 0.01) * 1.2;
+
+      particle.y += Math.cos(Date.now() * 0.006 + particle.x * 0.01) * 1.2;
     }
 
-    // Wave movement
     if (visualSettings.movement === "wave") {
       particle.y += Math.sin(Date.now() * 0.003 + particle.x * 0.02) * 1.2;
     }
 
-    // Rain movement
     if (visualSettings.movement === "rain") {
-      particle.y += 0.8 * visualSettings.speed;
+      // Rain should fall downward instead of drifting randomly.
+      particle.x += 0.2;
+      particle.y += 2.5 * visualSettings.speed;
 
       ctx.beginPath();
       ctx.moveTo(particle.x, particle.y);
       ctx.lineTo(particle.x, particle.y + particle.size * 3);
+
       ctx.strokeStyle = particleColor;
       ctx.globalAlpha = particle.opacity * 0.35;
       ctx.lineWidth = 1;
@@ -163,12 +174,14 @@ function animate() {
     }
 
     // Bounce from edges
-    if (particle.x < 0 || particle.x > canvas.width) {
-      particle.speedX *= -1;
-    }
+    if (visualSettings.movement !== "rain") {
+      if (particle.x < 0 || particle.x > canvas.width) {
+        particle.speedX *= -1;
+      }
 
-    if (particle.y < 0 || particle.y > canvas.height) {
-      particle.speedY *= -1;
+      if (particle.y < 0 || particle.y > canvas.height) {
+        particle.speedY *= -1;
+      }
     }
 
     ctx.globalAlpha = 1;
@@ -182,57 +195,63 @@ function animate() {
 
 animate();
 
-generateBtn.addEventListener("click", function () {
-  generateBtn.textContent = "Generating...";
-
-  const prompt = promptInput.value.toLowerCase().trim();
+generateBtn.addEventListener("click", async function () {
+  const prompt = promptInput.value.trim();
 
   if (prompt === "") {
-    console.log("Please enter a prompt.");
-    generateBtn.textContent = "Generate";
+    promptInput.focus();
     return;
   }
 
-  fetch("http://localhost:3000/visualize", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      prompt: prompt,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Server returned an error.");
-      }
+  generateBtn.textContent = "Generating...";
+  generateBtn.disabled = true;
 
-      return response.json();
-    })
-    .then((data) => {
-      console.log("SERVER RESPONSE:", data);
-
-      // Apply AI/server-generated visual settings
-      applyVisualSettings(data);
-
-      // Create new particles using the new settings
-      createParticles();
-
-      // Show AI interpretation
-      document.getElementById("aiMood").textContent = data.mood;
-      document.getElementById("aiAtmosphere").textContent = data.atmosphere;
-      document.getElementById("aiEnergy").textContent = data.energy;
-      console.log("Prompt:", prompt);
-      console.log("Visual settings applied:", visualSettings);
-    })
-    .catch((error) => {
-      console.error("Server error:", error);
-
-      aiSettings.textContent = "Could not generate visuals. Please try again.";
-    })
-    .finally(() => {
-      setTimeout(function () {
-        generateBtn.textContent = "Generate";
-      }, 800);
+  try {
+    const response = await fetch("http://localhost:3000/visualize", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: prompt,
+      }),
     });
+
+    if (!response.ok) {
+      throw new Error("Server returned an error.");
+    }
+
+    const data = await response.json();
+
+    console.log("SERVER RESPONSE:", data);
+
+    applyVisualSettings(data);
+    createParticles();
+
+    document.getElementById("aiMood").textContent = data.mood || "—";
+
+    document.getElementById("aiAtmosphere").textContent =
+      data.atmosphere || "—";
+
+    document.getElementById("aiEnergy").textContent = data.energy || "—";
+
+    console.log("Prompt:", prompt);
+    console.log("Visual settings applied:", visualSettings);
+  } catch (error) {
+    console.error("Generation error:", error);
+
+    document.getElementById("aiMood").textContent = "Unavailable";
+    document.getElementById("aiAtmosphere").textContent = "Unavailable";
+    document.getElementById("aiEnergy").textContent = "Try again";
+  } finally {
+    generateBtn.disabled = false;
+    generateBtn.textContent = "Generate";
+  }
+});
+
+promptInput.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    generateBtn.click();
+  }
 });

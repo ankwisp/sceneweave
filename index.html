@@ -1,30 +1,68 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI CREATIVE VISUALIZER</title>
+
+    <title>Sceneweave</title>
 
     <link rel="stylesheet" href="style.css" />
   </head>
+
   <body>
-    <h1>AI Creative Visualizer</h1>
-    <p>Turn your imagination into motion</p>
-    <input
-      id="promptInput"
-      type="text"
-      placeholder="Describe a scene, mood, or idea..."
-    />
-    <button id="generateBtn">Generate</button>
-    <canvas id="visualizer"></canvas>
-    <div id="aiInfo">
-      <span>AI Interpretation</span>
-      <div id="aiSettings">
-        <div><strong>Mood:</strong> <span id="aiMood">—</span></div>
-        <div><strong>Atmosphere:</strong> <span id="aiAtmosphere">—</span></div>
-        <div><strong>Energy:</strong> <span id="aiEnergy">—</span></div>
-      </div>
-    </div>
+    <main class="app">
+      <header class="hero">
+        <div class="brand">SCENEWEAVE</div>
+
+        <h1>Turn imagination<br />into motion.</h1>
+
+        <p>
+          Describe a scene, mood, or idea.<br />
+          AI turns it into a living visual.
+        </p>
+      </header>
+
+      <section class="generator">
+        <div class="prompt-row">
+          <input
+            id="promptInput"
+            type="text"
+            placeholder="e.g. dreamy rainy night in Seoul"
+            maxlength="500"
+          />
+
+          <button id="generateBtn">Generate</button>
+        </div>
+      </section>
+
+      <section class="visual-section">
+        <canvas id="visualizer"></canvas>
+      </section>
+
+      <section id="aiInfo">
+        <div class="section-label">AI INTERPRETATION</div>
+
+        <div id="aiSettings">
+          <div class="interpretation-item">
+            <span class="label">Mood</span>
+            <span id="aiMood">—</span>
+          </div>
+
+          <div class="interpretation-item">
+            <span class="label">Atmosphere</span>
+            <span id="aiAtmosphere">—</span>
+          </div>
+
+          <div class="interpretation-item">
+            <span class="label">Energy</span>
+            <span id="aiEnergy">—</span>
+          </div>
+        </div>
+      </section>
+
+      <footer>AI interprets the idea. Sceneweave brings it to life.</footer>
+    </main>
+
     <script src="script.js"></script>
   </body>
 </html>
